@@ -1,0 +1,190 @@
+﻿@model SmartQrGenerator.Web.Models.QrRequest
+
+@{
+    ViewData["Title"] = "Smart QR Generator";
+}
+
+<div class="container-fluid px-4 qr-page">
+    <div class="qr-shell w-100">
+        <div class="row g-0">
+
+            <div class="col-lg-5 qr-left">
+                <span class="step-badge">STEP 1</span>
+
+                <h1 class="page-title">
+                    Create Your QR Code
+                </h1>
+
+                <p class="page-subtitle mt-3">
+                    Enter a website URL and generate your QR code instantly.
+                </p>
+
+                <form asp-action="Index" asp-controller="Home" method="post" class="mt-5">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label asp-for="Url" class="form-label fw-bold mb-2">
+                            Website URL
+                        </label>
+
+                        <div class="input-wrap">
+                            <span class="input-icon">
+                                <i class="fa-solid fa-link"></i>
+                            </span>
+                            <input asp-for="Url"
+                                   class="form-control"
+                                   placeholder="https://example.com" />
+                        </div>
+
+                        <span asp-validation-for="Url" class="text-danger fw-semibold"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-main w-100">
+                        <i class="fa-solid fa-eye me-2"></i>
+                        Preview QR Code
+                    </button>
+                    <button type="button"
+                            class="btn btn-clear w-100 mt-3"
+                            onclick="clearForm()">
+                        <i class="fa-solid fa-rotate-right me-2"></i>
+                        Clear
+                    </button>
+                </form>
+
+                <div class="quick-tips">
+                    <h6>Quick Tips</h6>
+                    <p>
+                        <i class="fa-solid fa-circle-check text-success me-2"></i>
+                        Include http:// or https://
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-circle-check text-success me-2"></i>
+                        Enter a valid website address
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-circle-check text-success me-2"></i>
+                        Scan once before sharing
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-lg-7 qr-right">
+                <span class="step-badge">STEP 2</span>
+
+                <h2 class="page-title">
+                    Preview & Create
+                </h2>
+
+                <p class="page-subtitle mt-3">
+                    Review your QR code. If everything looks good, download, copy or share it.
+                </p>
+
+                <div class="preview-box mt-4">
+                    <div class="row align-items-center g-4">
+
+                        <div class="col-md-5 text-center">
+                            @if (!string.IsNullOrWhiteSpace(Model?.QrCodeBase64))
+                            {
+                                <img id="qrImage"
+                                     src="data:image/png;base64,@Model.QrCodeBase64"
+                                     alt="QR Code"
+                                     class="qr-img" />
+                            }
+                            else
+                            {
+                                <div class="empty-preview">
+                                    QR Preview
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-md-7">
+                            <h6 class="fw-bold">Your URL</h6>
+
+                            <p id="qrUrl" class="qr-url">
+                                @(string.IsNullOrWhiteSpace(Model?.Url) ? "https://example.com" : Model.Url)
+                            </p>
+
+                            <h6 class="fw-bold mt-4">QR Code Preview</h6>
+                            <p class="text-muted mb-0">
+                                Scan to test your QR code before using it.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model?.QrCodeBase64))
+                {
+                    <div class="row g-3 mt-4">
+
+                        <div class="col-md-4">
+                            <div class="action-card">
+                                <a download="qrcode.png"
+                                   href="data:image/png;base64,@Model.QrCodeBase64">
+                                    <div class="action-icon">
+                                        <i class="fa-solid fa-download"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Download</h6>
+                                    <p class="text-muted mb-0 small">Save as PNG image</p>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="action-card">
+                                <button type="button" onclick="copyLink()">
+                                    <div class="action-icon">
+                                        <i class="fa-solid fa-copy"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Copy Link</h6>
+                                    <p class="text-muted mb-0 small">Copy URL to clipboard</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="action-card">
+                                <button type="button" onclick="shareQr()">
+                                    <div class="action-icon">
+                                        <i class="fa-solid fa-share-nodes"></i>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">Share</h6>
+                                    <p class="text-muted mb-0 small">Share QR with others</p>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function clearForm() {
+            const input = document.getElementById("Url");
+
+            if (input) {
+                input.value = "";
+            }
+
+            document.querySelectorAll(".field-validation-error")
+                .forEach(x => x.innerHTML = "");
+
+            document.querySelectorAll(".input-validation-error")
+                .forEach(x => x.classList.remove("input-validation-error"));
+
+            window.location.href = "/";
+        }
+    </script>
+}
